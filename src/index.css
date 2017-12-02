@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+
+}
+
+.hero-image{
+  width: 50%;
+}
+.menu-item{
+  display: flex;
+  flex-direction: row;
+
+}
+.menu-item > div {
+  display:flex;
+}
