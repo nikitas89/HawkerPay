@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
-
 class Cart extends Component {
-checkout = ()=>{
-console.log('checkout')
-}
-
-
+  checkout = ()=>{
+    console.log('checkout')
+  }
   render() {
     return (
       <div className='cart'>
@@ -19,8 +16,5 @@ console.log('checkout')
       </div>
     );
   }
-
-
 }
-
 export default Cart;

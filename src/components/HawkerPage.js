@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import MenuItem from './MenuItem'
 import Cart from  './Cart'
 import '../App.css';
+import firebase from '../firebase.js'
+import Order from './Order.js'
+
+const dbRefObj = firebase.database().ref().child('restaurants')
+// dbRefObj.on('value', snap=>
+//   console.log(snap.val())
+// )
+
 class HawkerPage extends Component {
   state = {
     //load items from db
@@ -12,11 +20,26 @@ class HawkerPage extends Component {
   total:''
   }
 
+  setItemsState = ()=>{
+    var itemsChange = this.state.items
+   dbRefObj.on('value', snap=>{
+     itemsChange = snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items
+     console.log("snap val in method 1", snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items)
+      this.setState({
+        items: itemsChange
+      })
+      console.log(this.state.items);
+    })
+ }
+
   addToCart =  (item) =>{
-    console.log("FOUND CART!")
+    console.log(item);
     var found = false;
+    //write to db as well.
+    //then read state from db.
+    //ensure real time updates..
     var updatedCart = this.state.cart.map((cartItem) => {
-      if (cartItem.name == item.name) {
+      if (cartItem.name === item.name) {
         found = true;
         cartItem.quantity++;
         return cartItem;
@@ -41,7 +64,7 @@ class HawkerPage extends Component {
     this.setState({
       cart: updatedCart
     })
-  }
+  }//end addtocart
   render() {
     return (
       <div>
@@ -53,16 +76,25 @@ class HawkerPage extends Component {
         <div >
           {this.state.cart.length>0 &&
             <Cart cart={this.state.cart} total={this.state.total}/>
-
           }
         </div>
         <div className="menu-items-list">
           {this.state.items.map((item, index) => {
             return <MenuItem key={index} item={item} addToCart={this.addToCart} />
           })}
+          {/* addToCart passed as prop so that cart amout and items can be updated anytime state is updated in this component.
+            otherwise, state is set once in Cart and does not update automatically
+            */}
+        </div>
+        <div className="order">
+          <Order/>
         </div>
       </div>
     );
+  }
+
+  componentDidMount = () => {
+    // this.setItemsState()
   }
 }
 
