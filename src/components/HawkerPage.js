@@ -6,9 +6,22 @@ import firebase from '../firebase.js'
 import Order from './Order.js'
 
 const dbRefObj = firebase.database().ref().child('restaurants')
+const orderRefObj = firebase.database().ref().child('orders')
 // dbRefObj.on('value', snap=>
-//   console.log(snap.val())
+//   console.log("dbRefObj", snap.val())
 // )
+
+//set id and key for cart items using counter
+let cartCount  = 0
+// let newOrderRef = orderRefObj.push()
+// let orderRefId = newOrderRef.key
+// console.log("newOrderRef", "orderRefId");
+// console.log(newOrderRef, orderRefId);
+orderRefObj.on('value', snap=>
+// console.log("orderRefObj with key 1",snap.val())
+console.log("orderRefObj with key 1",snap.val())
+//use where child is equal H02
+)
 
 class HawkerPage extends Component {
   state = {
@@ -19,26 +32,39 @@ class HawkerPage extends Component {
   cart: [],
   total:''
   }
+  setCartState = ()=>{
+    var cartChange = this.state.cart
+   orderRefObj.on('value', snap=>{
+     cartChange = snap.val()[0]
+     // console.log("snap val in method 1", snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items)
+     //set with those where child status equals unpaid
+      this.setState({
+        cart: cartChange
+      })
+      console.log("this.state.cart",this.state.cart);
+    })
+  }
 
   setItemsState = ()=>{
     var itemsChange = this.state.items
    dbRefObj.on('value', snap=>{
      itemsChange = snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items
-     console.log("snap val in method 1", snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items)
+     // console.log("snap val in method 1", snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items)
       this.setState({
         items: itemsChange
       })
-      console.log(this.state.items);
+      // console.log(this.state.items);
     })
  }
 
   addToCart =  (item) =>{
-    console.log(item);
+//id and key for cart items
+    console.log("state cart", this.state.cart);
+    console.log(cartCount);
+    console.log("item1", item);
     var found = false;
-    //write to db as well.
-    //then read state from db.
-    //ensure real time updates..
-    var updatedCart = this.state.cart.map((cartItem) => {
+    var updatedCart ={H_id: "H02",items:{}, order_status:"unpaid", payment_status:"unpaid"}
+     var updatedCartItems = this.state.cart.map((cartItem) => {
       if (cartItem.name === item.name) {
         found = true;
         cartItem.quantity++;
@@ -47,22 +73,43 @@ class HawkerPage extends Component {
         return cartItem;
       }
     })
+    updatedCart.items = updatedCartItems
 
-    if (!found) { updatedCart.push({id: item.id, name: item.name, price: item.price, quantity: 1, key:item.id}) }
-
+    if (!found) {
+      cartCount++
+      // updatedCart.push(
+      // { items:
+      //   {id: cartCount, name: item.name, price: item.price, quantity: 1, key:cartCount}
+      // }
+      // )
+      updatedCart =
+      { H_id: "H02",
+        items:
+      { 0:
+        {id: cartCount, name: item.name, price: item.price, quantity: 1, key:cartCount}
+      }
+        , order_status:"unpaid", payment_status:"unpaid"
+      }
+    }
+    console.log("updatedCart",updatedCart);
+    //total sum of cart
     let totalNum = 0
-    updatedCart.forEach((item)=>{
-        totalNum += item.quantity*item.price
-      })
-      totalNum = parseFloat(Math.round(totalNum * 100) / 100).toFixed(2);
-
-      console.log("totalNum",totalNum )
+    // updatedCart.items.forEach((item)=>{
+    //     totalNum += item.quantity*item.price
+    //   })
+    //   totalNum = parseFloat(Math.round(totalNum * 100) / 100).toFixed(2);
+    //
+    //   // console.log("totalNum",totalNum )
       this.setState({
         total: totalNum
       })
-
+      console.log("updatedCart 1",updatedCart);
+        // firebase.database().ref('orders/' + 2).set(
+        // updatedCart
+        // )
+      // orderRefObj.push(updatedCart)
     this.setState({
-      cart: updatedCart
+      cart: updatedCart.items
     })
   }//end addtocart
   render() {
@@ -87,14 +134,17 @@ class HawkerPage extends Component {
             */}
         </div>
         <div className="order">
-          <Order/>
+          {/* <Order/> */}
         </div>
       </div>
     );
   }
 
-  componentDidMount = () => {
-    // this.setItemsState()
+  componentWillMount = () => {
+
+    this.setItemsState()
+    // this.setCartState()
+
   }
 }
 
