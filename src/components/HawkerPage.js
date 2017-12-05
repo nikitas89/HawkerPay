@@ -6,43 +6,55 @@ import firebase from '../firebase.js'
 import Order from './Order.js'
 
 const dbRefObj = firebase.database().ref().child('restaurants')
-const orderRefObj = firebase.database().ref().child('orders')
+// const orderRefObj = firebase.database().ref().child('orders')
+
 // dbRefObj.on('value', snap=>
 //   console.log("dbRefObj", snap.val())
 // )
 
 //set id and key for cart items using counter
-let cartCount  = 0
-// let newOrderRef = orderRefObj.push()
-// let orderRefId = newOrderRef.key
-// console.log("newOrderRef", "orderRefId");
-// console.log(newOrderRef, orderRefId);
-orderRefObj.on('value', snap=>
-// console.log("orderRefObj with key 1",snap.val())
-console.log("orderRefObj with key 1",snap.val())
-//use where child is equal H02
-)
+
+
+// orderRefObj.on('value', snap=>
+// // console.log("orderRefObj with key 1",snap.val())
+// console.log("orderRefObj for U01",snap.val())
+// //use where child is equal H02
+// )
 
 class HawkerPage extends Component {
   state = {
     //load items from db
-  items:  [{id: 1, name: "BASIL LEAF RICE", price: 4.50},
-            {id: 2, name: "Epic Apple", price: 3.29},
-            {id: 3, name: "Awesome Grape", price: 7.49}],
-  cart: [],
-  total:''
+    items:  [{id: 1, name: "BASIL LEAF RICE", price: 4.50},
+              {id: 2, name: "Epic Apple", price: 3.29},
+              {id: 3, name: "Awesome Grape", price: 7.49}],
+    cart: [],
+    total:'',
+    H_id: "H05",
+    U_id: "U01",
+    cartCount : 0
   }
-  setCartState = ()=>{
+
+  setCartState = (orderRefObj)=>{
+    console.log('setting cart state');
+    let hid= this.state.H_id
+    let uid= this.state.U_id
+    //1. shd be blank
     var cartChange = this.state.cart
+
+
    orderRefObj.on('value', snap=>{
-     cartChange = snap.val()[0]
-     // console.log("snap val in method 1", snap.val()["-L-W3ZtnZCvHzeYiqoRA"].items)
+     console.log("orderRefObj", snap.val())
+     var key  = Number(Object.keys(snap.val()))
+     console.log("key",key);
+     cartChange = snap.val()[key].items
+     console.log("cartChange", cartChange)
      //set with those where child status equals unpaid
-      this.setState({
-        cart: cartChange
-      })
-      console.log("this.state.cart",this.state.cart);
+      // console.log("this.state.cart",this.state.cart);
     })
+    this.setState({
+      // cart: cartChange
+    })
+    //update cart count
   }
 
   setItemsState = ()=>{
@@ -58,60 +70,45 @@ class HawkerPage extends Component {
  }
 
   addToCart =  (item) =>{
-//id and key for cart items
-    console.log("state cart", this.state.cart);
-    console.log(cartCount);
-    console.log("item1", item);
+    var cartCount = this.state.cartCount // change to lengt of cart
     var found = false;
-    var updatedCart ={H_id: "H02",items:{}, order_status:"unpaid", payment_status:"unpaid"}
-     var updatedCartItems = this.state.cart.map((cartItem) => {
+     var updatedCart = this.state.cart.map((cartItem) => {
       if (cartItem.name === item.name) {
         found = true;
         cartItem.quantity++;
-        return cartItem;
-      } else {
-        return cartItem;
       }
+      return cartItem;
     })
-    updatedCart.items = updatedCartItems
 
-    if (!found) {
-      cartCount++
-      // updatedCart.push(
-      // { items:
-      //   {id: cartCount, name: item.name, price: item.price, quantity: 1, key:cartCount}
-      // }
-      // )
-      updatedCart =
-      { H_id: "H02",
-        items:
-      { 0:
-        {id: cartCount, name: item.name, price: item.price, quantity: 1, key:cartCount}
-      }
-        , order_status:"unpaid", payment_status:"unpaid"
-      }
+    if (!found) {  cartCount++
+      updatedCart.push({id: cartCount, name: item.name, price: item.price, quantity: 1, key:cartCount})
     }
-    console.log("updatedCart",updatedCart);
-    //total sum of cart
+
     let totalNum = 0
-    // updatedCart.items.forEach((item)=>{
-    //     totalNum += item.quantity*item.price
-    //   })
-    //   totalNum = parseFloat(Math.round(totalNum * 100) / 100).toFixed(2);
-    //
-    //   // console.log("totalNum",totalNum )
-      this.setState({
-        total: totalNum
+    updatedCart.forEach((item)=>{
+        totalNum += item.quantity*item.price
       })
-      console.log("updatedCart 1",updatedCart);
-        // firebase.database().ref('orders/' + 2).set(
-        // updatedCart
-        // )
-      // orderRefObj.push(updatedCart)
-    this.setState({
-      cart: updatedCart.items
-    })
-  }//end addtocart
+      totalNum = parseFloat(Math.round(totalNum * 100) / 100).toFixed(2);
+      this.setState({
+        total: totalNum,
+        cart: updatedCart,
+        cartCount: cartCount
+      })
+      console.log("", this.state.cart);
+//creating new order each time. refactor to only create new cart if !found, otherwise lookup those other details from db and assign here, OR best, just update items directly for a given order
+    var newOrder ={ H_id: this.state.H_id,
+      U_id: this.state.U_id,
+      items:updatedCart,
+      order_status:"unpaid", payment_status:"unpaid"
+      }
+    console.log("newOrder",newOrder);
+    //set to this_order_id or next_order_id if new
+
+    firebase.database().ref('orders/' + 2).set(newOrder) //make this dynamic
+
+} //end addtocart
+
+
   render() {
     return (
       <div>
@@ -141,9 +138,10 @@ class HawkerPage extends Component {
   }
 
   componentWillMount = () => {
-
+var orderRefObj = firebase.database().ref().child('orders').orderByChild('U_id').equalTo("U01")
+console.log(typeof orderRefObj);
     this.setItemsState()
-    // this.setCartState()
+    this.setCartState(orderRefObj)
 
   }
 }
