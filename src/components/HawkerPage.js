@@ -150,17 +150,18 @@ if (this.state.hawkerOrderIdCount)
     var that  = this
     var orderRefObjHid =firebase.database().ref().child('orders').orderByKey().equalTo("H06")
     //fix this!
-    var orderRefObj = firebase.database().ref().child('orders').orderByChild('U_id').equalTo("U06")
+    var orderRefObj = firebase.database().ref().child('orders/' + 'H06').orderByChild('U_id').equalTo("U06")
 
     orderRefObjHid.on('value', snap=>
       console.log("orderRefObjHid", snap.val())
     )
     let cartItem = {}
     orderRefObj.on('value', snap=>
-      {console.log("orderRefObj", snap.val())
+      {
+        console.log("orderRefObj", snap.val())
       if (snap.numChildren()){
         //check for Hid also...
-         cartItem = snap.val().filter(order=>order.payment_status==="unpaid")
+         // cartItem = snap.val().filter(order=>order.payment_status==="unpaid")
       }
     })
     //pass this key to addtocart set method.
