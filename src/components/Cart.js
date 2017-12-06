@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 class Cart extends Component {
   checkout = ()=>{
-    console.log('checkout')
+    this.props.checkout(this.props.cart)
+
   }
   render() {
     return (

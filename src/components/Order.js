@@ -9,16 +9,15 @@ class Order extends Component {
   }
 
  setOrders = ()=>{
-
    var orderChange = this.state.order
-  dbRefObj.on('value', snap=>{
-    orderChange = snap.val().order
+   dbRefObj.on('value', snap=>{
+     orderChange = snap.val().order
      this.setState({
        order: orderChange
      })
      console.log(this.state);
    })
-}
+ }
 
   render() {
     return (
