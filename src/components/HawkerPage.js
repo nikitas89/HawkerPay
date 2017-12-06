@@ -3,17 +3,9 @@ import MenuItem from './MenuItem'
 import Cart from  './Cart'
 import '../App.css';
 import firebase from '../firebase.js'
-import Order from './Order.js'
+// import Order from './Order.js'
 
 const dbRefObj = firebase.database().ref().child('restaurants')
-// var hawkerOrderIdCount   = 0
-// const orderRefObj = firebase.database().ref().child('orders')
-
-// orderRefObj.on('value', snap=>
-// // console.log("orderRefObj with key 1",snap.val())
-// console.log("orderRefObj for U01",snap.val())
-// //use where child is equal H02
-// )
 
 class HawkerPage extends Component {
   constructor(props) {
@@ -27,18 +19,19 @@ class HawkerPage extends Component {
     H_id: "H01",
     U_id: "U03",
     cartCount : 0,
-    hawkerOrderIdCount:'',
-    cartId:0
+    hawkerOrderIdCount:'', //refactor and remove
+    cartId:0, //check and remove
+    cartIndex:null // HID/OID in firebase for HID/UID/unpaid
   }
 }
 
   setCartState = (cartItem)=>{  //, hawkerOrderIdCount
     console.log('setting cart state');
-    let hid= this.state.H_id
-    let uid= this.state.U_id
+    // let hid= this.state.H_id
+    // let uid= this.state.U_id
     //cartItem is the cart from db. this method runs only when there is existing cart.
 
-    let getItems = cartItem[0].items
+    let getItems = cartItem.items
     console.log(getItems);
     let totalNum = 0
     getItems.forEach((item)=>{ totalNum += item.quantity*item.price })
@@ -92,25 +85,42 @@ class HawkerPage extends Component {
 //creating new order each time. refactor to only create new cart if !found, otherwise lookup those other details from db and assign here, OR best, just update items directly for a given order
 
     var newOrder ={
-      U_id: this.state.U_id,
-      items:updatedCart,
-      order_status:"unpaid", payment_status:"unpaid"
+        U_id: this.state.U_id,
+        items:updatedCart,
+        order_status:"unpaid", payment_status:"unpaid"
       }
-    console.log("newOrder",newOrder);
-    //set to this_order_id or next_order_id if new
-    //get order _id of order which is not paid.
-    // if(){
-    // }else {
-    //   firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder) //make this dynamic
-    //
-    // }
-      let id = this.state.hawkerOrderIdCount +1
-      !this.state.cartItem?
-      firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder) :""
 
-    // firebase.database().ref('orders/' + 3).set(newOrder) //make this dynamic
+      let id = this.state.hawkerOrderIdCount +1
+
+      if(this.state.cartIndex){
+        //check refactoring to +(this.state.cartIndex ||id)
+        firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex).set(newOrder)
+      }else {
+        firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder)
+      }
 } //end addtocart
 
+checkout = ()=>{
+  // var orderRef = firebase.database().ref('orders/' + 'H06/' + e.target.id).child('order_status')
+
+  let id = this.state.hawkerOrderIdCount +1
+  // var orderCORef
+  // if(this.state.cartIndex){
+  //   //check refactoring to +(this.state.cartIndex ||id)
+  //   orderCORef =  firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex).child('payment_status')
+  //   console.log('111111', orderCORef)
+  // }else {
+  //    orderCORef = firebase.database().ref('orders/' + this.state.H_id +'/'+id).child('payment_status')
+  //    console.log('2222222', orderCORef)
+  // }
+  
+  //change to paid
+  var orderCORefPayment =  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child('payment_status')
+    console.log('111111', orderCORefPayment)
+    orderCORefPayment.set('paid')
+    //change to preparing/cooking
+  var orderCORef =  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child('order_status')
+}//end checkout
 
   render() {
     return (
@@ -122,7 +132,7 @@ class HawkerPage extends Component {
         </header>
         <div >
           {this.state.cart.length>0 &&
-            <Cart cart={this.state.cart} total={this.state.total}/>
+            <Cart cart={this.state.cart} total={this.state.total} checkout={this.checkout}/>
           }
         </div>
         <div className="menu-items-list">
@@ -142,13 +152,13 @@ class HawkerPage extends Component {
 
 
   componentWillMount = () => {
-    var that  = this
     let H_id = this.state.H_id
     //GET RECORD FOR THIS HID
     //SET NUM CHILDREN FOR UPDATING LATER
     var orderRefObjHid =firebase.database().ref('orders/' + H_id)
     orderRefObjHid.on('value', snap=>
-      {console.log("orderRefObjHid", snap.val())
+      {
+        // console.log("orderRefObjHid", snap.val())
       this.setState({
         hawkerOrderIdCount : snap.numChildren()
       })}
@@ -160,12 +170,22 @@ class HawkerPage extends Component {
     let cartItem = {}
     orderRefObj.on('value', snap=>
       {
-        console.log("orderRefObj", snap.val())
+        console.log("orderRefObj 1", snap.val())
         if (snap.numChildren()){
-          var removeEmptyEl = snap.val().filter(el => el)
 
-          //we already check for hid in the url
-          cartItem = removeEmptyEl.filter(order=>order.payment_status==="unpaid" )
+          //add index too, and save that index
+            snap.val().forEach((item, index)=>{
+            // console.log(item.payment_status);
+            if (item.payment_status==="unpaid") {
+              // console.log(item.payment_status, 'true');
+              console.log(index);
+              cartItem = item
+              this.setState({
+                cartIndex :index
+              })
+            }
+          })//end foreach
+
           console.log("cartItem",cartItem, (typeof cartItem))
           cartItem?  this.setCartState(cartItem) :""
       }
@@ -176,7 +196,7 @@ class HawkerPage extends Component {
 
     this.setItemsState()
     //need to move to snap call back above, otherwise loads too fast
-  // cartItem?  this.setCartState(cartItem) :"" //, hawkerOrderIdCount //set if cartItem exists
+    // cartItem?  this.setCartState(cartItem) :"" //, hawkerOrderIdCount //set if cartItem exists
 
   }
 }
