@@ -24,42 +24,36 @@ class HawkerPage extends Component {
               {id: 3, name: "Awesome Grape", price: 7.49}],
     cart: [],
     total:'',
-    H_id: "H06",
-    U_id: "U06",
+    H_id: "H01",
+    U_id: "U03",
     cartCount : 0,
     hawkerOrderIdCount:'',
     cartId:0
-  };
+  }
 }
 
-  setCartState = (orderRefObj)=>{  //, hawkerOrderIdCount
+  setCartState = (cartItem)=>{  //, hawkerOrderIdCount
     console.log('setting cart state');
     let hid= this.state.H_id
     let uid= this.state.U_id
-    //1. shd be blank
-    var cartChange = this.state.cart
+    //cartItem is the cart from db. this method runs only when there is existing cart.
 
-if (this.state.hawkerOrderIdCount)
-{   orderRefObj.on('value', snap=>{
-     console.log("orderRefObj", snap.val())
-     // var key  = Object.keys(snap.val())
-     // cartChange = snap.val()[key].items
-     cartChange = snap.val()[hid].items
-     console.log("cartChange", cartChange)
-     //set with those where child status equals unpaid
-      // console.log("this.state.cart",this.state.cart);
+    let getItems = cartItem[0].items
+    console.log(getItems);
+    let totalNum = 0
+    getItems.forEach((item)=>{ totalNum += item.quantity*item.price })
+      totalNum = parseFloat(Math.round(totalNum * 100) / 100).toFixed(2);
       this.setState({
-        cart: cartChange
+        total: totalNum,
+        cart: getItems,
+        cartCount: getItems.length
       })
-    })}
-
-
-    //update cart count
   }
 
   setItemsState = ()=>{
     var itemsChange = this.state.items
    dbRefObj.on('value', snap=>{
+     //lookup by resto id.
      itemsChange = snap.val()["-L-dt-8rmIQ-tSGnShkO"].items
      // console.log("snap val in method 1", snap.val()["-L-dt-8rmIQ-tSGnShkO"].items)
       this.setState({
@@ -111,7 +105,8 @@ if (this.state.hawkerOrderIdCount)
     //
     // }
       let id = this.state.hawkerOrderIdCount +1
-    firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder)
+      !this.state.cartItem?
+      firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder) :""
 
     // firebase.database().ref('orders/' + 3).set(newOrder) //make this dynamic
 } //end addtocart
@@ -148,41 +143,40 @@ if (this.state.hawkerOrderIdCount)
 
   componentWillMount = () => {
     var that  = this
-    var orderRefObjHid =firebase.database().ref().child('orders').orderByKey().equalTo("H06")
-    //fix this!
-    var orderRefObj = firebase.database().ref().child('orders/' + 'H06').orderByChild('U_id').equalTo("U06")
-
+    let H_id = this.state.H_id
+    //GET RECORD FOR THIS HID
+    //SET NUM CHILDREN FOR UPDATING LATER
+    var orderRefObjHid =firebase.database().ref('orders/' + H_id)
     orderRefObjHid.on('value', snap=>
-      console.log("orderRefObjHid", snap.val())
+      {console.log("orderRefObjHid", snap.val())
+      this.setState({
+        hawkerOrderIdCount : snap.numChildren()
+      })}
     )
+
+    //GET RECORD FOR THIS UID + HID
+    var orderRefObj = firebase.database().ref('orders/' + H_id).orderByChild('U_id').equalTo(this.state.U_id)
+
     let cartItem = {}
     orderRefObj.on('value', snap=>
       {
         console.log("orderRefObj", snap.val())
-      if (snap.numChildren()){
-        //check for Hid also...
-         // cartItem = snap.val().filter(order=>order.payment_status==="unpaid")
+        if (snap.numChildren()){
+          var removeEmptyEl = snap.val().filter(el => el)
+
+          //we already check for hid in the url
+          cartItem = removeEmptyEl.filter(order=>order.payment_status==="unpaid" )
+          console.log("cartItem",cartItem, (typeof cartItem))
+          cartItem?  this.setCartState(cartItem) :""
       }
     })
     //pass this key to addtocart set method.
-    var key  = Object.keys(cartItem)
+    // var key  = Object.keys(cartItem)
 
-    firebase.database().ref().child("orders").orderByKey().equalTo("H06").on("value", function(snap) {
-      console.log("There are "+snap.numChildren()+" orders");
-      that.setState({
-        hawkerOrderIdCount : snap.numChildren()
-      })
-
-      // this.state.hawkerOrderIdCount = snapshot.numChildren()
-      console.log( that.state.hawkerOrderIdCount);
-    })
-    // console.log(orderRefObjHid.val(), orderRefObjHid.val().length);
-    // console.log(orderRefObj.val());
-    //.orderByChild('payment_status').equalTo("unpaid")
-    //.orderByValue('payment_status')
 
     this.setItemsState()
-    this.setCartState(orderRefObj) //, hawkerOrderIdCount
+    //need to move to snap call back above, otherwise loads too fast
+  // cartItem?  this.setCartState(cartItem) :"" //, hawkerOrderIdCount //set if cartItem exists
 
   }
 }
