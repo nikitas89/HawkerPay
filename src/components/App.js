@@ -75,9 +75,7 @@ class App extends Component {
           <Route exact path='/' component={Home} />
           <Route path='/hawker' render={() => <HawkerPage loggedIn={this.state.user} U_id={this.state.id} />} />
           <Route path='/orders' render={() => <OrderList loggedIn={this.state.user} U_id={this.state.id} />} />
-
         </div>
-
       </Router>
     )
   }

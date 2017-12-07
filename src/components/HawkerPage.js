@@ -40,8 +40,7 @@ class HawkerPage extends Component {
        })
        console.log(this.state.U_id)
        this.setCartState
-     }
-   )
+      })
    }
   }
   setCartState = (cartItem)=>{
@@ -135,13 +134,13 @@ checkout = ()=>{
         <header className="App-header">
           <h4>Sisaket Thai</h4>
           {/* <img className="hero-image" src="https://www.whyq.sg/images?src=https://s3-ap-southeast-1.amazonaws.com/whyqsg/uploads/stalls/b5e0b7c0ca47415723b28f2d94f9877e.PNG&h=356&w=640&zc=" alt=""/> */}
-          <h3>Menu:</h3>
         </header>
         <div >
-          {this.state.cart &&
+          {this.state.cart.length &&
             <Cart cart={this.state.cart} total={this.state.total} checkout={this.checkout}/>
           }
         </div>
+        <h3>Menu:</h3>
         <div className="menu-items-list">
           {this.state.items.map((item, index) => {
             return <MenuItem key={index} item={item} addToCart={this.addToCart} />
@@ -171,9 +170,7 @@ checkout = ()=>{
         hawkerOrderIdCount : snap.numChildren()
         })
       })
-
       var cartItem, orderRefObj
-
       orderRefObjHid.orderByChild("U_id").equalTo(U_id).on('value', (snap)=> {
         var exists = (snap.val() !== null)
         console.log(H_id,this.state.U_id,exists, snap.val())
@@ -201,39 +198,6 @@ checkout = ()=>{
           } //end if
 
       });
-
-    //GET RECORD FOR THIS UID + HID
-
-    // var exists = true
-    // try{
-    //   orderRefObj = firebase.database().ref('orders/' + H_id).orderByChild('U_id').equalTo(this.state.U_id)
-    //   }catch(e){
-    //     console.log(e)
-    //     exists = false
-    //   }
-
-
-
-    // if (exists) {
-    //   orderRefObj.on('value', snap=>{
-    //         console.log("orderRefObj 1", snap.val())
-    //         if (snap.numChildren())
-    //           {
-    //             //add index too, and save that index
-    //               snap.val().forEach((item, index)=>{
-    //               if (item.payment_status==="unpaid") {
-    //                   cartItem = item
-    //                   this.setState({  cartIndex :index  })
-    //                 }
-    //                 }) //end foreach
-    //             console.log("cartItem",cartItem, (typeof cartItem))
-    //             cartItem?  this.setCartState(cartItem) :""
-    //           }//end snap num
-    //     }) //end snap
-    //   } //end if
-    // this.setItemsState()
-
-
   }//end componentWillMount
 }//end class
 

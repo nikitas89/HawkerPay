@@ -4,32 +4,61 @@ import Order from './Order.js'
 import {Redirect} from 'react-router-dom'
 
 class OrderList extends Component {
-  state = {
-    orders : []
-  }
-  getId () {
-   if (!this.props.user) {
-     return <Redirect to='/' />
+  constructor (props) {
+   super(props)
+   this.state = {
+     orders : [],
+     U_id: props.U_id ||'U1',
+     user : props.loggedIn
+     }
    }
 
+  getId () {
+    console.log('getid');
+   if (!this.state.user) {
+     return <Redirect to='/' />
+   }
    const userIdCheck = firebase.database().ref('users').orderByChild('email').equalTo(this.state.user.email)
    userIdCheck.on('value', snap => {
      const existingId = Object.keys(snap.val())[0]
      this.setState({
-       id: existingId
+       U_id: existingId
      })
-   }
-   )
+   })
   }
- setOrders = (orderRefObj)=>{
+ setOrders = ()=>{
+   var orderRefObj = firebase.database().ref('/orders/' + 'H1').orderByChild('U_id').equalTo(this.state.U_id)
+
    var ordersItems = []
    orderRefObj.on('value', snap=>{
-     var removeEmptyEl = snap.val().filter(el => el)
-     removeEmptyEl.forEach(order=>{
-       if(order.payment_status==='paid'){
-         ordersItems.push(order.items)
-       }
-     })
+    var exists = (snap.val() !== null)
+    console.log(this.state.U_id,exists, snap.val(), typeof snap.val())
+      if (exists) {
+        var userOrders = []
+        var userOrdersObj = snap.val()
+        var keys = Object.keys(userOrdersObj)
+        console.log(keys);
+        console.log(userOrdersObj[keys])
+        keys.length===1?userOrders.push(userOrdersObj):userOrders=userOrdersObj
+        //add filter
+        userOrders.forEach((order, index)=>{
+          console.log(order)
+          var thisKey = Object.keys(order)
+          console.log(order[thisKey])
+          if (order[thisKey].payment_status==="paid") {
+              ordersItems.push(order[thisKey].items)
+              console.log('FOUND PAID');
+              this.setState({  cartIndex :Number(thisKey[0])  })
+            }
+        }) //end foreach
+      }
+     // var removeEmptyEl = snap.val().filter(el => el)
+     // removeEmptyEl.forEach(order=>{
+     //   console.log(order);
+     //   if(order.payment_status==='paid'){
+     //     ordersItems.push(order.items)
+     //   }
+     // })
    this.setState({orders: ordersItems})
    })
  }
@@ -52,9 +81,12 @@ class OrderList extends Component {
 
   componentDidMount = () => {
     // console.log('this is mounted');
-    var orderRefObj = firebase.database().ref('/orders/' + 'H1').orderByChild('U_id').equalTo(this.props.U_id)
-    orderRefObj? this.setOrders(orderRefObj) :""
     this.getId()
+    this.setOrders()
+    // var orderRefObj = firebase.database().ref('/orders/' + 'H1').orderByChild('U_id').equalTo(this.state.U_id)
+    // console.log(orderRefObj);
+
+    // orderRefObj? this.setOrders(orderRefObj) :""
   }
 
 }
