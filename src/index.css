@@ -2,7 +2,6 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-
 }
 
 .hero-image{
@@ -11,8 +10,11 @@ body {
 .menu-item{
   display: flex;
   flex-direction: row;
-
 }
 .menu-item > div {
   display:flex;
+}
+div.each-order{
+  /*border-color: black;*/
+  /*border: 2px;*/
 }
