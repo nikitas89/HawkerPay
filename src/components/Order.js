@@ -1,21 +1,27 @@
 import React, { Component } from 'react';
 import firebase from '../firebase.js'
 
-const dbRefObj = firebase.database().ref().child('orders')
 
 class Order extends Component {
   state = {
-    order : {}
+    orders : []
   }
 
- setOrders = ()=>{
-   var orderChange = this.state.order
-   dbRefObj.on('value', snap=>{
-     orderChange = snap.val().order
-     this.setState({
-       order: orderChange
+ setOrders = (orderRefObj)=>{
+var ordersItems = []
+   orderRefObj.on('value', snap=>{
+     var removeEmptyEl = snap.val().filter(el => el)
+     removeEmptyEl.forEach(order=>{
+       if(order.payment_status==='paid'){
+         console.log(order.items[0]);
+         ordersItems.push(order.items)
+       }
      })
-     console.log(this.state);
+
+     this.setState({
+       orders: ordersItems
+     })
+     // console.log(this.state.orders);
    })
  }
 
@@ -23,17 +29,22 @@ class Order extends Component {
     return (
       <div>
         <h1>hihihihi</h1>
-        {/* {this.state.order.items.map((item, index)=>{
-          return {item}
-        })} */}
-        {this.state.order.order_status}
+        {this.state.orders.map(order=>{
+          // console.log(order)
+           // order.map(item=> <p>{item.name}</p>
+           // )
+        })
+        }
+
       </div>
     );
   }
 
 componentDidMount = () => {
   // console.log('this is mounted');
-  this.setOrders()
+  var orderRefObj = firebase.database().ref('orders/' + "H01").orderByChild('U_id').equalTo("U03")
+orderRefObj? this.setOrders(orderRefObj) :""
+
 }
 
 }

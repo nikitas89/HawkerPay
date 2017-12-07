@@ -104,16 +104,7 @@ checkout = ()=>{
   // var orderRef = firebase.database().ref('orders/' + 'H06/' + e.target.id).child('order_status')
 
   let id = this.state.hawkerOrderIdCount +1
-  // var orderCORef
-  // if(this.state.cartIndex){
-  //   //check refactoring to +(this.state.cartIndex ||id)
-  //   orderCORef =  firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex).child('payment_status')
-  //   console.log('111111', orderCORef)
-  // }else {
-  //    orderCORef = firebase.database().ref('orders/' + this.state.H_id +'/'+id).child('payment_status')
-  //    console.log('2222222', orderCORef)
-  // }
-  
+
   //change to paid
   var orderCORefPayment =  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child('payment_status')
     console.log('111111', orderCORefPayment)
@@ -131,7 +122,7 @@ checkout = ()=>{
           <h3>Menu:</h3>
         </header>
         <div >
-          {this.state.cart.length>0 &&
+          {this.state.cart &&
             <Cart cart={this.state.cart} total={this.state.total} checkout={this.checkout}/>
           }
         </div>
@@ -167,7 +158,7 @@ checkout = ()=>{
     //GET RECORD FOR THIS UID + HID
     var orderRefObj = firebase.database().ref('orders/' + H_id).orderByChild('U_id').equalTo(this.state.U_id)
 
-    let cartItem = {}
+    let cartItem
     orderRefObj.on('value', snap=>
       {
         console.log("orderRefObj 1", snap.val())
