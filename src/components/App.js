@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom'
 // import { auth, provider } from './firebase.js'
 import HawkerPage from './HawkerPage'
-import Order from './Order'
+import OrderList from './Orders'
 
 class App extends Component {
   render() {
@@ -16,7 +16,7 @@ class App extends Component {
         <div className="App">
           <Route exact path='/' component={Home} />
           <Route path='/hawker' component={HawkerPage} />
-          <Route path='/orders' component={Order} />
+          <Route path='/orders' component={OrderList} />
           {/* <HawkerPage/> */}
         </div>
       </Router>

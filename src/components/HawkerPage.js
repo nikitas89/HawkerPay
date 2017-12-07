@@ -92,25 +92,26 @@ class HawkerPage extends Component {
 
       let id = this.state.hawkerOrderIdCount +1
 
-      if(this.state.cartIndex){
-        //check refactoring to +(this.state.cartIndex ||id)
-        firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex).set(newOrder)
-      }else {
-        firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder)
-      }
+      firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex || id).set(newOrder)
+      // if(this.state.cartIndex){
+      //   //check refactoring to +(this.state.cartIndex ||id)
+      // }else {
+      //   firebase.database().ref('orders/' + this.state.H_id +'/'+id).set(newOrder)
+      // }
 } //end addtocart
 
 checkout = ()=>{
-  // var orderRef = firebase.database().ref('orders/' + 'H06/' + e.target.id).child('order_status')
-
   let id = this.state.hawkerOrderIdCount +1
 
   //change to paid
-  var orderCORefPayment =  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child('payment_status')
-    console.log('111111', orderCORefPayment)
-    orderCORefPayment.set('paid')
-    //change to preparing/cooking
-  var orderCORef =  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child('order_status')
+  var orderCORefPayment =
+  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child( 'payment_status')
+  orderCORefPayment.set('paid')
+
+  //change to preparing/cooking
+  var orderCORef =
+  firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || id)).child( 'order_status')
+  orderCORef.set('preparing')
 }//end checkout
 
   render() {
@@ -118,7 +119,7 @@ checkout = ()=>{
       <div>
         <header className="App-header">
           <h4>Sisaket Thai</h4>
-          <img className="hero-image" src="https://www.whyq.sg/images?src=https://s3-ap-southeast-1.amazonaws.com/whyqsg/uploads/stalls/b5e0b7c0ca47415723b28f2d94f9877e.PNG&h=356&w=640&zc=" alt=""/>
+          {/* <img className="hero-image" src="https://www.whyq.sg/images?src=https://s3-ap-southeast-1.amazonaws.com/whyqsg/uploads/stalls/b5e0b7c0ca47415723b28f2d94f9877e.PNG&h=356&w=640&zc=" alt=""/> */}
           <h3>Menu:</h3>
         </header>
         <div >
