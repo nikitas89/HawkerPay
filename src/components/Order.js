@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
-
 class Order extends Component {
-  // state = {
-  //
-  // }
 
   render() {
     console.log(this.props.order);

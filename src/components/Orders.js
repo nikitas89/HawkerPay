@@ -1,12 +1,26 @@
 import React, { Component } from 'react';
 import firebase from '../firebase.js'
-import Order from './order.js'
+import Order from './Order.js'
+import {Redirect} from 'react-router-dom'
 
 class OrderList extends Component {
   state = {
     orders : []
   }
+  getId () {
+   if (!this.props.user) {
+     return <Redirect to='/' />
+   }
 
+   const userIdCheck = firebase.database().ref('users').orderByChild('email').equalTo(this.state.user.email)
+   userIdCheck.on('value', snap => {
+     const existingId = Object.keys(snap.val())[0]
+     this.setState({
+       id: existingId
+     })
+   }
+   )
+  }
  setOrders = (orderRefObj)=>{
    var ordersItems = []
    orderRefObj.on('value', snap=>{
@@ -36,12 +50,12 @@ class OrderList extends Component {
     )
   }
 
-componentDidMount = () => {
-  // console.log('this is mounted');
-  var orderRefObj = firebase.database().ref('orders/' + "H01").orderByChild('U_id').equalTo("U03")
-orderRefObj? this.setOrders(orderRefObj) :""
-
-}
+  componentDidMount = () => {
+    // console.log('this is mounted');
+    var orderRefObj = firebase.database().ref('/orders/' + 'H1').orderByChild('U_id').equalTo(this.props.U_id)
+    orderRefObj? this.setOrders(orderRefObj) :""
+    this.getId()
+  }
 
 }
 
