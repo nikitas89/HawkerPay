@@ -19,7 +19,7 @@ class HawkerPage extends Component {
     total:'',
     H_id: "H1",
     // U_id: "U03",
-    U_id: props.U_id,
+    U_id: props.U_id || 'U2',
     user:props.loggedIn,
     cartCount : 0,
     hawkerOrderIdCount:'', //refactor and remove
@@ -28,13 +28,10 @@ class HawkerPage extends Component {
   }
 }
   getId = () => {
-    console.log("1234")
-    console.log(!this.state.user)
    if (!this.state.user) {
-     console.log('user does not exist!!6786786')
      return <Redirect to='/' />
    }else{
-  console.log("zyx")
+     console.log(this.state.user.email);
      const userIdCheck = firebase.database().ref('users').orderByChild('email').equalTo(this.state.user.email)
      userIdCheck.on('value', snap => {
        const existingId = Object.keys(snap.val())[0]
@@ -45,15 +42,9 @@ class HawkerPage extends Component {
        this.setCartState
      }
    )
-   console.log("1234")
    }
-
   }
   setCartState = (cartItem)=>{  //, hawkerOrderIdCount
-    console.log('setting cart state');
-    // let hid= this.state.H_id
-    // let uid= this.state.U_id
-    //cartItem is the cart from db. this method runs only when there is existing cart.
 
     let getItems = cartItem.items
     console.log(getItems);
@@ -169,7 +160,8 @@ checkout = ()=>{
 
   componentWillMount = () => {
     this.getId()
-    let H_id = this.state.H_id
+    let H_id = this.state.H_id || 'H1'
+    let U_id = this.state.U_id || 'U2'
     //GET RECORD FOR THIS HID
     //SET NUM CHILDREN FOR UPDATING LATER
     var orderRefObjHid =firebase.database().ref('orders/' + H_id)
@@ -179,40 +171,63 @@ checkout = ()=>{
         hawkerOrderIdCount : snap.numChildren()
         })
       })
-    orderRefObjHid.child('U03').once('value', function(snap) {
-      var exists = (snap.val() !== null);
-      console.log(exists)
+      var cartItem
+      var orderRefObj
+      orderRefObjHid.child(this.state.U_id).on('value', (snap)=> {
+        var exists = (snap.val() !== null)
+        console.log(H_id,this.state.U_id,exists)
+        if (exists) {
+          console.log('IM HERE NOW inside exists')
+          // orderRefObj.on('value', snap=>{
+                console.log("orderRefObj 1", snap.val())
+                // if (snap.numChildren())
+                //   {
+                    //add index too, and save that index
+                      snap.val().forEach((item, index)=>{
+                      if (item.payment_status==="unpaid") {
+                          cartItem = item
+                          // console.log('FOUND UNPAID');
+                          this.setState({  cartIndex :index  })
+                        }
+
+                        }) //end foreach
+                    console.log("cartItem",cartItem, (typeof cartItem))
+                    cartItem?  this.setCartState(cartItem) :""
+                  // }//end snap num
+            // }) //end snap
+          } //end if
+
       });
 
     //GET RECORD FOR THIS UID + HID
-    var orderRefObj
-    var exists = true
-    try{
-      orderRefObj = firebase.database().ref('orders/' + H_id).orderByChild('U_id').equalTo(this.state.U_id)
-      }catch(e){
-        // console.log(e)
-        exists = false
-      }
 
-    var cartItem
+    // var exists = true
+    // try{
+    //   orderRefObj = firebase.database().ref('orders/' + H_id).orderByChild('U_id').equalTo(this.state.U_id)
+    //   }catch(e){
+    //     console.log(e)
+    //     exists = false
+    //   }
 
-    if (exists) {
-      orderRefObj.on('value', snap=>{
-            console.log("orderRefObj 1", snap.val())
-            if (snap.numChildren())
-              {
-                //add index too, and save that index
-                  snap.val().forEach((item, index)=>{
-                  if (item.payment_status==="unpaid") {
-                      cartItem = item
-                      this.setState({  cartIndex :index  })
-                    }
-                    }) //end foreach
-                // console.log("cartItem",cartItem, (typeof cartItem))
-                cartItem?  this.setCartState(cartItem) :""
-              }//end snap num
-        }) //end snap
-      } //end if
+
+
+    // if (exists) {
+    //   orderRefObj.on('value', snap=>{
+    //         console.log("orderRefObj 1", snap.val())
+    //         if (snap.numChildren())
+    //           {
+    //             //add index too, and save that index
+    //               snap.val().forEach((item, index)=>{
+    //               if (item.payment_status==="unpaid") {
+    //                   cartItem = item
+    //                   this.setState({  cartIndex :index  })
+    //                 }
+    //                 }) //end foreach
+    //             console.log("cartItem",cartItem, (typeof cartItem))
+    //             cartItem?  this.setCartState(cartItem) :""
+    //           }//end snap num
+    //     }) //end snap
+    //   } //end if
     // this.setItemsState()
 
 
