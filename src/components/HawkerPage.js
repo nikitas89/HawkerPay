@@ -3,8 +3,8 @@ import MenuItem from './MenuItem'
 import Cart from  './Cart'
 import '../App.css';
 import firebase from '../firebase.js'
-// import Order from './Order.js'
-import {Redirect} from 'react-router-dom'
+import Order from './Order.js'
+import {Route,Redirect} from 'react-router-dom'
 
 const dbRefObj = firebase.database().ref().child('hawkers')
 
@@ -58,23 +58,38 @@ class HawkerPage extends Component {
   }
 
   setItemsState = ()=>{
+
     var itemsChange = this.state.items
+    var dbRefObj =firebase.database().ref('hawkers/' + this.state.H_id)
    dbRefObj.on('value', snap=>{
      //lookup by resto id.
-     itemsChange = snap.val()[this.state.H_id].items
-
+     itemsChange = snap.val().items
+     console.log(itemsChange);
       this.setState({
         items: itemsChange
       })
-      // console.log(this.state.items);
+      console.log(this.state.items);
     })
+    // var orderRefObjHid =firebase.database().ref('hawkers/' + this.state.H_id)
+   //  var itemsChange = this.state.items
+   // orderRefObjHid.on('value', snap=>{
+   //   var removeEmptyEl = snap.val().filter(el => el)
+   //   //lookup by resto id.
+   //   console.log(snap.val(), removeEmptyEl);
+   //   itemsChange = removeEmptyEl.items
+   //
+   //    this.setState({
+   //      items: itemsChange
+   //    })
+   //    console.log(this.state.items);
+   //  })
  }
 
   addToCart =  (item) =>{
     var cartCount = this.state.cartCount // change to lengt of cart
     var found = false;
      var updatedCart = this.state.cart.map((cartItem) => {
-      if (cartItem.name === item.name) {
+      if (cartItem.name == item.name) {
         found = true;
         cartItem.quantity++;
       }
@@ -126,13 +141,26 @@ checkout = ()=>{
   var orderCORef =
   firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || oid)).child( 'order_status')
   orderCORef.set('preparing')
+  var paidOrder = firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex)
+
+  paidOrder.on('value', snap=>{
+    var paidOrderObj = snap.val()
+    console.log(paidOrderObj);
+    this.setState({
+      cart:[],
+      orderComplete:true,
+      paidOrder :paidOrderObj
+    })
+
+  })
+  console.log(this.state.cart);
 }//end checkout
 
   render() {
     return (
       <div>
         <header className="App-header">
-          <h4>Sisaket Thai</h4>
+          <h4></h4>
           {/* <img className="hero-image" src="https://www.whyq.sg/images?src=https://s3-ap-southeast-1.amazonaws.com/whyqsg/uploads/stalls/b5e0b7c0ca47415723b28f2d94f9877e.PNG&h=356&w=640&zc=" alt=""/> */}
         </header>
         <div >
@@ -140,17 +168,16 @@ checkout = ()=>{
             <Cart cart={this.state.cart} total={this.state.total} checkout={this.checkout}/>
           }
         </div>
-        <h3>Menu:</h3>
         <div className="menu-items-list">
-          {this.state.items.map((item, index) => {
+          <h3>Menu:</h3>
+          {!this.state.orderComplete &&this.state.items.map((item, index) => {
             return <MenuItem key={index} item={item} addToCart={this.addToCart} />
           })}
-          {/* addToCart passed as prop so that cart amout and items can be updated anytime state is updated in this component.
-            otherwise, state is set once in Cart and does not update automatically
-            */}
         </div>
-        <div className="order">
-          {/* <Order/> */}
+        <div className="order" >
+        {this.state.orderComplete &&
+            <p>Your order status is: {this.state.paidOrder.order_status}</p>
+         }
         </div>
       </div>
     );
@@ -158,8 +185,9 @@ checkout = ()=>{
 
 
   componentWillMount = () => {
+    this.setItemsState()
     this.getId()
-    let H_id = this.state.H_id || 'H1'
+    let H_id = this.state.H_id || 'H2'
     let U_id = this.state.U_id || 'U2'
     //GET RECORD FOR THIS HID
     //SET NUM CHILDREN FOR UPDATING LATER
@@ -176,21 +204,24 @@ checkout = ()=>{
         console.log(H_id,this.state.U_id,exists, snap.val())
         if (exists) {
                     var userOrders = []
+                    var removeEmptyEl = snap.val().filter(el => el)
+                    // removeEmptyEl
                     var userOrdersObj = snap.val()
+                    console.log(removeEmptyEl, userOrdersObj);
+
                     var keys = Object.keys(userOrdersObj)
                     console.log(keys);
-                    console.log(userOrdersObj[keys])
+                    // console.log(userOrdersObj[keys])
                     keys.length===1?userOrders.push(userOrdersObj):userOrders=userOrdersObj
-
+                    console.log(userOrders);
                       userOrders.forEach((order, index)=>{
                         console.log(order)
-                        var thisKey = Object.keys(order)
-                        // order[thisKey]
-                        console.log(order[thisKey])
-                      if (order[thisKey].payment_status==="unpaid") {
-                          cartItem = order[thisKey].items
-                          console.log('FOUND UNPAID');
-                          this.setState({  cartIndex :Number(thisKey[0])  })
+                        // var thisKey = Object.keys(order)
+                        // order[thisKey]?console.log(order[thisKey]):console.log('not found');
+                      if (order && order.payment_status=="unpaid") {
+                          cartItem = order.items
+                          console.log('FOUND UNPAID', order.items, index);
+                          this.setState({  cartIndex :index  })
                         }
                         }) //end foreach
                     console.log("cartItem",cartItem, (typeof cartItem))
