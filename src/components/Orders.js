@@ -27,7 +27,7 @@ class OrderList extends Component {
    })
   }
  setOrders = ()=>{
-   var orderRefObj = firebase.database().ref('/orders/' + 'H1').orderByChild('U_id').equalTo(this.state.U_id)
+   var orderRefObj = firebase.database().ref('/orders/' + 'H2').orderByChild('U_id').equalTo(this.state.U_id)
 
    var ordersItems = []
    orderRefObj.on('value', snap=>{

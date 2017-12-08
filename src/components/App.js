@@ -65,13 +65,21 @@ class App extends Component {
   render() {
     return (
       <Router>
-        <div className="App">
-          {this.state.user
+        <div className="App ">
+
+
+
+          <div className="navbar">
+            <Link to='/' >Home</Link>
+            <Link to='/hawker' >Hawker</Link>
+            <Link to='/orders' >Orders</Link>
+            {this.state.user
               ? <Link to='/' onClick={() => this.logout()}>Log Out</Link>
               : <Link to='/' onClick={() => this.login()}>Log In</Link>
             }
-            <Link to='/hawker' >Hawker</Link>
-            <Link to='/orders' >Orders</Link>
+            </div>
+          
+
           <Route exact path='/' component={Home} />
           <Route path='/hawker' render={() => <HawkerPage loggedIn={this.state.user} U_id={this.state.id} />} />
           <Route path='/orders' render={() => <OrderList loggedIn={this.state.user} U_id={this.state.id} />} />
