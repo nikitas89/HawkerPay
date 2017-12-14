@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import firebase from '../firebase.js'
 import Order from './Order.js'
 import {Redirect} from 'react-router-dom'
-
+import '../index.css';
 class OrderList extends Component {
   constructor (props) {
    super(props)
    this.state = {
      orders : [],
-     U_id: props.U_id ||'U1',
+     U_id: props.U_id ||'U2',
      user : props.loggedIn
      }
    }
@@ -24,6 +24,7 @@ class OrderList extends Component {
      this.setState({
        U_id: existingId
      })
+     console.log(this.state.U_id, existingId);
    })
   }
  setOrders = ()=>{
@@ -38,17 +39,17 @@ class OrderList extends Component {
         var userOrdersObj = snap.val()
         var keys = Object.keys(userOrdersObj)
         console.log(keys);
-        console.log(userOrdersObj[keys])
+        // console.log(userOrdersObj[keys])
         keys.length===1?userOrders.push(userOrdersObj):userOrders=userOrdersObj
         //add filter
         userOrders.forEach((order, index)=>{
           console.log(order)
-          var thisKey = Object.keys(order)
-          console.log(order[thisKey])
-          if (order[thisKey].payment_status==="paid") {
-              ordersItems.push(order[thisKey].items)
+          // var thisKey = Object.keys(order)
+          // console.log(order[thisKey])
+          if (order.payment_status==="paid") {
+              ordersItems.push(order.items)
               console.log('FOUND PAID');
-              this.setState({  cartIndex :Number(thisKey[0])  })
+              // this.setState({  cartIndex :Number(thisKey[0])  })
             }
         }) //end foreach
       }
@@ -64,7 +65,7 @@ class OrderList extends Component {
         <h1>All My Orders</h1>
         {this.state.orders.map((order, index)=>{
         return (  <div key={index} className="each-order">
-            <p>Order #{index}</p>
+            <h4>Order #{index}</h4>
              <Order key={index} order={order} />
             </div>)
         })
