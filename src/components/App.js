@@ -71,12 +71,12 @@ class App extends Component {
 
 
           <div className="navbar">
-            <Link to='/' >Home</Link>
-            <Link to='/hawker' >Hawker</Link>
-            <Link to='/orders' >Orders</Link>
+            <Link to='/' className="mx-3" >Home</Link>
+            <Link to='/hawker' className="mx-3" >Hawker</Link>
+            <Link to='/orders' className="mx-3" >All Orders</Link>
             {this.state.user
-              ? <Link to='/' onClick={() => this.logout()}>Log Out</Link>
-              : <Link to='/' onClick={() => this.login()}>Log In</Link>
+              ? <Link to='/' onClick={() => this.logout()} className="mx-3" >Log Out</Link>
+              : <Link to='/' onClick={() => this.login()} className="mx-3" >Log In</Link>
             }
             </div>
 

@@ -120,6 +120,9 @@ class HawkerPage extends Component {
 
 checkout = ()=>{
   let oid = this.state.hawkerOrderIdCount +1
+console.log(oid);
+//cart index shd be applied.
+console.log(this.state.cartIndex);
 
   //change to paid
   var orderCORefPayment =
@@ -130,18 +133,19 @@ checkout = ()=>{
   var orderCORef =
   firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || oid)).child( 'order_status')
   orderCORef.set('preparing')
-
   var paidOrder = firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex)
+  console.log(paidOrder);
   paidOrder.on('value', snap=>{
     var paidOrderObj = snap.val()
-
+    var exists = (snap.val() !== null)
     console.log(paidOrderObj);
-    this.setState({
-      cart:[],
-      orderComplete:true,
-      paidOrder :paidOrderObj
-    })
-
+    if (exists) {
+      this.setState({
+        cart:[],
+        orderComplete:true,
+        paidOrder :paidOrderObj
+        })
+    }else console.log('not found');
   })
   console.log(this.state.cart);
 }//end checkout
@@ -154,19 +158,22 @@ checkout = ()=>{
           {/* <img className="hero-image" src="https://www.whyq.sg/images?src=https://s3-ap-southeast-1.amazonaws.com/whyqsg/uploads/stalls/b5e0b7c0ca47415723b28f2d94f9877e.PNG&h=356&w=640&zc=" alt=""/> */}
         </header>
         <div >
-          {this.state.cart.length &&
+          {this.state.cart.length>0 &&
             <Cart cart={this.state.cart} total={this.state.total} checkout={this.checkout}/>
           }
         </div>
         <div className="menu-items-list">
-          <h3>Menu:</h3>
+          {/* <h3>Menu:</h3> */}
           {!this.state.orderComplete &&this.state.items.map((item, index) => {
             return <MenuItem key={index} item={item} addToCart={this.addToCart} />
-          })}
+          })
+        }
         </div>
-        <div className="order" >
-        {this.state.orderComplete &&
+        <div className="order  " >
+        {this.state.orderComplete && this.state.paidOrder.order_status &&
+          <div className="cart menu-item-card">
             <p>Your order status is: {this.state.paidOrder.order_status}</p>
+          </div>
          }
         </div>
       </div>
