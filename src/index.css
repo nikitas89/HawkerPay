@@ -1,14 +1,36 @@
+/* css vanilla */
+
+*, *:before, *:after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
 body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-
+	padding: 10px;
+	display: flex;
+	line-height: 1.5;
+	min-height: 100vh;
+	align-items: center;
+	font-family: Raleway;
+	flex-direction: column;
+	justify-content: center;
+	background-color: #fbfbfb;
 }
 
-.hero-image{
+@media only screen and (min-width: 600px)  {
+.menu-item-card {
+	width: 550px;
+}
+}
+
+navbar >a{
+	color: teal;
+}
+/* .hero-image{
   width: 50%;
-}
-.menu-item{
+} */
+/* .menu-item{
   display: flex;
   flex-direction: row;
 }
@@ -17,12 +39,75 @@ div.menu-item > div {
 }
 .item-price{
   padding: 0 20px 0 20px;
-}
+} */
 .add-button{
-  padding: 0 20px 0 0; 
+  padding: 0 20px 0 0;
 
 }
 div.each-order{
   /*border-color: black;*/
   /*border: 2px;*/
+}
+
+.menu-item-card {
+  padding: 10px;
+  display: flex;
+  border-radius: 2px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24);
+  transition: all 0.2s ease-in;
+	margin-bottom: 10px;
+}
+.menu-item-card:hover {
+  cursor: pointer;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.24);
+}
+.menu-item-card.cart{
+	display: block;
+	background-color: teal;
+	color: aliceblue;
+}
+.menu-item-card .item-image {
+  width: 70px;
+  height: 70px;
+  margin-right: 10px;
+  border-radius: 2px;
+  background-size: cover;
+  background-color: #ebebeb;
+  background-position: center;
+}
+.menu-item-card .item-content {
+  flex: 1;
+}
+.menu-item-card .item-content .top-line {
+  display: flex;
+  justify-content: space-between;
+}
+.menu-item-card .item-content .top-line .item-name {
+  color: #333;
+  font-weight: 400;
+  position: relative;
+}
+.menu-item-card .item-content .top-line .item-dots {
+  flex: 1;
+  display: flex;
+  margin: 0 10px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.menu-item-card .item-content .top-line .item-dots .dots {
+  width: 100%;
+  border-top: dotted 1px #ccc;
+}
+.menu-item-card .item-content .top-line .item-price {
+  color: teal;
+  font-weight: bold;
+}
+.menu-item-card .item-content .item-description {
+  color: #999;
+  font-size: 14px;
+  margin-top: 2px;
+  font-weight: 100;
 }

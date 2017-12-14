@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import MenuItem from './MenuItem'
 import Cart from  './Cart'
-import '../App.css';
+// import '../App.css';
+import '../index.css';
 import firebase from '../firebase.js'
 import Order from './Order.js'
 import {Route,Redirect} from 'react-router-dom'
@@ -70,19 +71,7 @@ class HawkerPage extends Component {
       })
       console.log(this.state.items);
     })
-    // var orderRefObjHid =firebase.database().ref('hawkers/' + this.state.H_id)
-   //  var itemsChange = this.state.items
-   // orderRefObjHid.on('value', snap=>{
-   //   var removeEmptyEl = snap.val().filter(el => el)
-   //   //lookup by resto id.
-   //   console.log(snap.val(), removeEmptyEl);
-   //   itemsChange = removeEmptyEl.items
-   //
-   //    this.setState({
-   //      items: itemsChange
-   //    })
-   //    console.log(this.state.items);
-   //  })
+
  }
 
   addToCart =  (item) =>{
@@ -141,10 +130,11 @@ checkout = ()=>{
   var orderCORef =
   firebase.database().ref('orders/' + this.state.H_id +'/'+(this.state.cartIndex || oid)).child( 'order_status')
   orderCORef.set('preparing')
-  var paidOrder = firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex)
 
+  var paidOrder = firebase.database().ref('orders/' + this.state.H_id +'/'+this.state.cartIndex)
   paidOrder.on('value', snap=>{
     var paidOrderObj = snap.val()
+
     console.log(paidOrderObj);
     this.setState({
       cart:[],
@@ -207,20 +197,17 @@ checkout = ()=>{
                     var removeEmptyEl = snap.val().filter(el => el)
                     // removeEmptyEl
                     var userOrdersObj = snap.val()
-                    console.log(removeEmptyEl, userOrdersObj);
-
+                    // console.log(removeEmptyEl, userOrdersObj);
                     var keys = Object.keys(userOrdersObj)
-                    console.log(keys);
+                    // console.log(keys);
                     // console.log(userOrdersObj[keys])
                     keys.length===1?userOrders.push(userOrdersObj):userOrders=userOrdersObj
-                    console.log(userOrders);
-                      userOrders.forEach((order, index)=>{
-                        console.log(order)
-                        // var thisKey = Object.keys(order)
-                        // order[thisKey]?console.log(order[thisKey]):console.log('not found');
+                    // console.log(userOrders);
+                    userOrders.forEach((order, index)=>{
+                      // console.log(order)
                       if (order && order.payment_status=="unpaid") {
                           cartItem = order.items
-                          console.log('FOUND UNPAID', order.items, index);
+                          // console.log('FOUND UNPAID', order.items, index);
                           this.setState({  cartIndex :index  })
                         }
                         }) //end foreach

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../App.css';
+// import '../index.css';
 import {
   BrowserRouter as Router,
   Route,
@@ -78,7 +79,7 @@ class App extends Component {
               : <Link to='/' onClick={() => this.login()}>Log In</Link>
             }
             </div>
-          
+
 
           <Route exact path='/' component={Home} />
           <Route path='/hawker' render={() => <HawkerPage loggedIn={this.state.user} U_id={this.state.id} />} />

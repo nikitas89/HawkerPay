@@ -52,13 +52,7 @@ class OrderList extends Component {
             }
         }) //end foreach
       }
-     // var removeEmptyEl = snap.val().filter(el => el)
-     // removeEmptyEl.forEach(order=>{
-     //   console.log(order);
-     //   if(order.payment_status==='paid'){
-     //     ordersItems.push(order.items)
-     //   }
-     // })
+
    this.setState({orders: ordersItems})
    })
  }
